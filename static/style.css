@@ -1,31 +1,32 @@
+/* 1. VARIABLES & RESET */
 :root {
     --accent-red: #ff1b1b;
     --deep-black: #0a0a0b;
     --glass-bg: rgba(255, 255, 255, 0.05);
-    --text-main: 'Netflix Sans';
-    --text-sub: 'Roboto Condensed'
+    --text-main: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Fallback for Netflix Sans */
+    --text-sub: 'Roboto Condensed', sans-serif;
+}
+
+* {
+    box-sizing: border-box; /* Crucial for mobile: includes padding in width */
 }
 
 body {
     margin: 0;
+    padding: 0;
     background-color: var(--deep-black);
     color: white;
     font-family: var(--text-sub);
+    overflow-x: hidden; /* Prevents side-scrolling */
+    width: 100%;
 }
 
-.tagline{
-    font-size: 2.2rem;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    margin: 10px;
-}
-
-/* Home Page: Infinite Background */
+/* 2. BACKGROUND ANIMATION */
 .poster-grid-container {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     z-index: -1;
-    opacity: 0.2;
+    opacity: 0.15;
 }
 
 .poster-track {
@@ -47,18 +48,18 @@ body {
     border-radius: 8px;
 }
 
-/* Home Page: Search Area */
+/* 3. HERO / SEARCH SECTION */
 .hero-section {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    padding: 20px;
 }
 
 .logo-main {
-    font-family: var(--text-main);
     font-weight: 900;
     font-size: 6rem;
     margin: 0;
@@ -67,6 +68,11 @@ body {
 
 .logo-main span { color: var(--accent-red); }
 
+.tagline {
+    font-size: 1.8rem;
+    margin: 15px 0;
+}
+
 .search-box {
     margin-top: 20px;
     background: white;
@@ -74,18 +80,18 @@ body {
     border-radius: 50px;
     display: flex;
     box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: 550px; /* Limits width on desktop */
 }
 
 .search-box input {
     background: transparent;
     border: none;
     color: #111;
-    padding: 10px 30px;
-    width: 400px;
-    border-radius: 60px;
+    padding: 10px 25px;
+    flex-grow: 1; /* Takes up remaining space */
     font-size: 1.1rem;
     outline: none;
-    font-family: var(--text-sub);
 }
 
 .search-box button {
@@ -97,13 +103,10 @@ body {
     font-weight: 700;
     cursor: pointer;
     transition: 0.3s;
-    font-family: var(--text-main);
     text-transform: uppercase;
 }
 
-.search-box button:hover { background: #ff1b1b; transform: scale(1.03); }
-
-/* Dashboard Layout */
+/* 4. DASHBOARD & RESULTS */
 .dashboard {
     display: grid;
     grid-template-columns: 380px 1fr;
@@ -124,88 +127,21 @@ body {
     margin-bottom: 25px;
 }
 
-.badge {
-    background: var(--glass-bg);
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    border: 1px solid rgba(255,255,255,0.1);
-    margin-right: 8px;
-}
-
-/* Grid: No Mini-Scrolls */
 .content-area { 
     padding: 40px;
-    margin: 15px;
- }
+}
 
 .grid-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 40px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
 }
 
 .minimal-card {
     background: var(--glass-bg);
     border-radius: 15px;
     border: 1px solid rgba(255,255,255,0.05);
-}
-
-.card-img {
-    height: 220px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 15px 15px 0 0;
-}
-
-.card-body { padding: 30px; }
-
-.card-desc {
-    font-size: 0.95rem;
-    color: #aaa;
-    line-height: 1.6;
-    margin-top: 15px;
-    /* No height limit or scrollbars */
-}
-
-.back-btn-pill {
-    background: transparent;
-    border: 1px solid white;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    margin: 5px;
-}
-
-/* Metadata row inside cards */
-.card-meta-row {
-    display: flex;
-    gap: 8px;
-    margin: 10px 0;
-    align-items: center;
-}
-
-.small-badge {
-    background: rgba(255, 255, 255, 0.08);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-family: var(--text-sub);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #eee;
-}
-
-/* Ensure card body expands properly for the extra info */
-.card-body {
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-}
-
-.minimal-card {
-    transition: transform 0.3s ease, border-color 0.3s ease;
+    transition: 0.3s;
 }
 
 .minimal-card:hover {
@@ -213,122 +149,101 @@ body {
     border-color: var(--accent-red);
 }
 
+.card-img {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px 15px 0 0;
+}
+
+.card-body { padding: 25px; }
+
+.card-desc {
+    font-size: 0.9rem;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+/* 5. FOOTER & LOGIC SECTIONS */
 .logic-footer {
-    grid-column: 1 / -1; /* Spans across the sidebar and the grid */
-    margin-top: 60px;
-    padding: 40px;
+    grid-column: 1 / -1;
+    margin-top: 40px;
+    padding: 30px;
     background: rgba(255, 255, 255, 0.03);
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.footer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 20px;
-}
-
-.engine-badge {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    background: var(--accent-red);
-    padding: 5px 12px;
-    border-radius: 50px;
-    font-weight: 800;
+    border-radius: 20px;
 }
 
 .logic-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-}
-
-.logic-card {
-    text-align: left;
-}
-
-.logic-icon {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-}
-
-.logic-card h4 {
-    color: #fff;
-    margin-bottom: 10px;
-    font-size: 1rem;
-}
-
-.logic-card p {
-    font-size: 0.85rem;
-    color: #888;
-    line-height: 1.6;
+    gap: 20px;
 }
 
 .simple-footer {
-    grid-column: 1 / -1;
-    margin-top: 80px;
-    padding: 30px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
     text-align: center;
+    padding: 40px;
+    opacity: 0.6;
 }
 
-.simple-footer p {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.5); /* Faded for a subtle look */
-    line-height: 1.8;
-    font-family: var(--text-sub);
-    line-gap-override: 0.5px;
-}
+/* --- 6. MOBILE RESPONSIVE FIXES (THE MAGIC) --- */
 
-/* --- Mobile Responsive Adjustments --- */
-
-/* Tablet and Phone View (Widths less than 768px) */
-@media (max-width: 768px) {
-    .container {
-        padding: 10px;
-    }
-
-    h1 {
-        font-size: 2rem; /* Smaller title so it doesn't wrap weirdly */
-    }
-
-    .search-container {
-        flex-direction: column; /* Stack input and button vertically */
-        gap: 10px;
-    }
-
-    #movie-input, button {
-        width: 100%; /* Full width for easier tapping */
-        border-radius: 8px; /* Round all corners since they are stacked */
-    }
-
-    .movie-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 2 columns on most phones */
-        gap: 15px;
-    }
-
-    .movie-card h3 {
-        font-size: 0.9rem; /* Smaller text for smaller cards */
-    }
-}
-
-/* Very Small Phones (Widths less than 480px) */
-@media (max-width: 480px) {
-    .movie-grid {
-        grid-template-columns: repeat(2, 1fr); /* Force 2 columns */
-        gap: 10px;
+@media (max-width: 900px) {
+    .dashboard {
+        grid-template-columns: 1fr; /* Stack sidebar on top of content */
     }
     
-    .simple-footer {
-        font-size: 0.8rem;
-        padding: 15px;
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        text-align: center;
+    }
+
+    .identity-poster {
+        max-width: 250px;
+        margin: 0 auto 20px;
     }
 }
 
+@media (max-width: 600px) {
+    .logo-main {
+        font-size: 3.5rem; /* Shorter logo */
+    }
+
+    .tagline {
+        font-size: 1.2rem;
+    }
+
+    .search-box {
+        flex-direction: column; /* Stack input and button */
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .search-box input {
+        background: white;
+        margin-bottom: 10px;
+        border-radius: 50px;
+        width: 100%;
+        padding: 15px;
+    }
+
+    .search-box button {
+        width: 100%;
+    }
+
+    .content-area {
+        padding: 15px;
+    }
+
+    .grid-layout {
+        grid-template-columns: 1fr; /* One card per row */
+    }
+
+    .logic-grid {
+        grid-template-columns: 1fr; /* Stack logic cards */
+    }
+    
+    .poster-track {
+        grid-template-columns: repeat(3, 1fr); /* Less clutter in background */
+    }
+}
