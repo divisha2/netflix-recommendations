@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Next | Movie Recommender</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@300;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="poster-grid-container" id="background-scroll">
+        <div class="poster-track" id="poster-track"></div>
+    </div>
+
+    <div class="hero-section" id="hero">
+        <h1 class="logo-main">WHAT<span>NEXT</span></h1>
+        <p class="tagline">Find your Next Watch</p>
+        <div class="search-box">
+            <input type="text" id="user-input" placeholder="Enter a movie you love...">
+            <button onclick="fetchRecommendations()">Discover</button>
+        </div>
+    </div>
+
+    <div class="dashboard" id="results" style="display: none;">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo-small" onclick="location.reload()">What<span>Next</span></h1>
+                <button class="back-btn-pill" onclick="location.reload()">↺ New Search</button>
+            </div>
+            <div id="selection-profile"></div>
+        </aside>
+
+        <main class="content-area">
+            <header class="content-header">
+                <h1 class="dash-title">Our Recommendations</h1>
+                <h2>Curated matches based on your interest.</h2>
+            </header>
+            
+            <div class="grid-layout" id="rec-grid"></div>
+
+            <!--<footer class="simple-footer">
+                <p>
+                    <div class="how"><strong>How it works:</strong> This engine is powered by a <u>Deep Learning Transformer Model</u> that understands the <i>meaning</i> behind every movie. 
+        Instead of just matching keywords, we generate <u>High-Dimensional Semantic Embeddings</u>—mathematical "fingerprints" of a movie’s themes, mood, and plot. 
+        By calculating the <u>Cosine Similarity</u> between these 384-dimensional vectors, our AI finds matches that share the same "thematic DNA," 
+        allowing it to realize that a movie about "outer space" is related to one about "galactic exploration" even if they don't share a single word.
+                </p>
+            </footer>-->
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
