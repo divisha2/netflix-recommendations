@@ -8,19 +8,21 @@ from sklearn.metrics.pairwise import cosine_similarity
 app = Flask(__name__)
 
 # --- INITIALIZATION ---
-MODEL_PATH = 'netflix_model.pkl'
+# Using the updated v2 model with Semantic Embeddings
+MODEL_PATH = 'netflix_model_v2.pkl'
 
 if os.path.exists(MODEL_PATH):
     with open(MODEL_PATH, 'rb') as f:
         data = pickle.load(f)
-        df = data['df'].reset_index(drop=True)  # CRITICAL: Reset index to match array positions
-        pca_features = data['pca_features']
-    print("✅ System Ready: Index and Features Aligned.")
+        # Reset index to ensure the dataframe rows align perfectly with the embeddings array
+        df = data['df'].reset_index(drop=True)
+        embeddings = data['embeddings']
+    print("✅ System Ready: AI Semantic Model Loaded and Aligned.")
 else:
-    print("❌ Error: netflix_model.pkl not found!")
+    print(f"❌ Error: {MODEL_PATH} not found!")
 
 def get_movie_details(pos):
-    """Helper to get movie data by integer position"""
+    """Helper to get movie data by integer position in the dataframe"""
     row = df.iloc[pos]
     return {
         'title': str(row.get('title', 'Unknown')),
@@ -38,32 +40,63 @@ def home():
 @app.route('/recommend', methods=['POST'])
 def recommend():
     try:
-        user_query = request.get_json().get('title', '').strip().lower()
+        # Get user input from the JSON request
+        data = request.get_json()
+        user_query = data.get('title', '').strip()
         
-        # 1. Find the movie - search across titles
-        match = df[df['title'].str.lower().str.contains(user_query, na=False)]
+        if not user_query:
+            return jsonify({'success': False, 'message': 'Please enter a movie name'})
+
+        # 1. SEARCH LOGIC: Find all titles containing the query
+        # We search case-insensitively
+        matches = df[df['title'].str.contains(user_query, case=False, na=False)]
         
-        if match.empty:
+        if matches.empty:
             return jsonify({'success': False, 'message': 'Movie not found'})
 
-        # 2. Get the INTEGER POSITION (Important for matching with pca_features array)
-        # We take the first match found
-        idx_pos = df.index.get_loc(match.index[0])
+        # 2. AMBIGUITY CHECK: Did the user provide a broad search?
+        # If multiple matches found AND user didn't type the EXACT title...
+        exact_match = matches[matches['title'].str.lower() == user_query.lower()]
         
-        # 3. Calculate Cosine Similarity
-        # current_vector shape: (1, n_features), pca_features shape: (n_movies, n_features)
-        current_vector = pca_features[idx_pos].reshape(1, -1)
-        sim_scores = cosine_similarity(current_vector, pca_features)[0]
+        if len(matches) > 1 and exact_match.empty:
+            # Return a list of potential matches for the user to choose from
+            options = []
+            for i in matches.index[:10]: # Limit to top 10 matches to keep it clean
+                options.append({
+                    'title': df.at[i, 'title'],
+                    'year': str(df.at[i, 'release_year']),
+                    'type': df.at[i, 'type']
+                })
+            return jsonify({
+                'success': True, 
+                'status': 'ambiguous', 
+                'matches': options
+            })
 
-        # 4. Apply Genre Boosting
+        # 3. SELECT TARGET: Use the exact match if found, otherwise the first result
+        if not exact_match.empty:
+            target_idx = exact_match.index[0]
+        else:
+            target_idx = matches.index[0]
+
+        # Get the integer position for the embeddings array
+        idx_pos = df.index.get_loc(target_idx)
+        
+        # 4. CALCULATE SEMANTIC SIMILARITY
+        # current_vector: (1, 384), embeddings: (TotalMovies, 384)
+        current_vector = embeddings[idx_pos].reshape(1, -1)
+        sim_scores = cosine_similarity(current_vector, embeddings)[0]
+
+        # 5. GENRE BOOSTING
         target_genres_str = df.iloc[idx_pos]['listed_in']
         target_genres = set(target_genres_str.split(', ')) if pd.notna(target_genres_str) else set()
 
-        # We create a copy to avoid modifying the original similarity scores directly in a bad way
+        # Create a copy to modify for boosting
         boosted_scores = sim_scores.copy()
 
         for i in range(len(boosted_scores)):
             if i == idx_pos:
+                boosted_scores[i] = -1 # Ensure we don't recommend the same movie
                 continue
             
             curr_genres_str = df.iloc[i]['listed_in']
@@ -71,40 +104,24 @@ def recommend():
                 curr_genres = set(curr_genres_str.split(', '))
                 shared = target_genres.intersection(curr_genres)
                 if shared:
-                    # Give a 0.1 boost for each matching genre
+                    # Apply a 0.1 boost for every matching genre category
                     boosted_scores[i] += (0.1 * len(shared))
 
-        # 5. Get Top Recommendations
-        # Sort indices by boosted similarity scores in descending order
-        related_indices = boosted_scores.argsort()[::-1]
-        
-        # Filter out the searched movie and get top 6
-        final_indices = [i for i in related_indices if i != idx_pos][:6]
+        # 6. GET TOP 6 RECOMMENDATIONS
+        related_indices = boosted_scores.argsort()[::-1][:6]
 
         return jsonify({
             'success': True,
+            'status': 'results',
             'searched_movie': get_movie_details(idx_pos),
-            'recommendations': [get_movie_details(i) for i in final_indices]
+            'recommendations': [get_movie_details(i) for i in related_indices]
         })
 
     except Exception as e:
-        print(f"Server Error: {e}")
-        return jsonify({'success': False, 'message': str(e)})
-
-# Change the loading section in your app.py to this:
-MODEL_PATH = 'netflix_model_v2.pkl'
-
-if os.path.exists(MODEL_PATH):
-    with open(MODEL_PATH, 'rb') as f:
-        data = pickle.load(f)
-        df = data['df'].reset_index(drop=True)
-        # We now use 'embeddings' instead of 'pca_features'
-        embeddings = data['embeddings']
-    print("✅ AI Semantic Model Loaded.")
-
-# Update the 'recommend' function logic:
-# current_vector = embeddings[idx_pos].reshape(1, -1)
-# sim_scores = cosine_similarity(current_vector, embeddings)[0]
+        print(f"⚠️ Server Error: {e}")
+        return jsonify({'success': False, 'message': 'An internal error occurred.'})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    # Use environment variable for port to satisfy Render's requirements
+    port = int(os.environ.get("PORT", 5001))
+    app.run(debug=True, host='0.0.0.0', port=port)
