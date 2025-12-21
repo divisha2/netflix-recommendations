@@ -287,3 +287,48 @@ body {
     line-gap-override: 0.5px;
 }
 
+/* --- Mobile Responsive Adjustments --- */
+
+/* Tablet and Phone View (Widths less than 768px) */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2rem; /* Smaller title so it doesn't wrap weirdly */
+    }
+
+    .search-container {
+        flex-direction: column; /* Stack input and button vertically */
+        gap: 10px;
+    }
+
+    #movie-input, button {
+        width: 100%; /* Full width for easier tapping */
+        border-radius: 8px; /* Round all corners since they are stacked */
+    }
+
+    .movie-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 2 columns on most phones */
+        gap: 15px;
+    }
+
+    .movie-card h3 {
+        font-size: 0.9rem; /* Smaller text for smaller cards */
+    }
+}
+
+/* Very Small Phones (Widths less than 480px) */
+@media (max-width: 480px) {
+    .movie-grid {
+        grid-template-columns: repeat(2, 1fr); /* Force 2 columns */
+        gap: 10px;
+    }
+    
+    .simple-footer {
+        font-size: 0.8rem;
+        padding: 15px;
+    }
+}
+
