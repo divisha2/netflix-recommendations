@@ -343,3 +343,19 @@ body {
         grid-template-columns: 1fr; /* Stack the logic cards */
     }
 }
+
+.platform-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-right: 5px;
+    text-transform: uppercase;
+    color: white;
+}
+
+.netflix { background: #E50914; }
+.hulu { background: #3DBB3D; color: #000; }
+.prime { background: #00A8E1; }
+.disneyplus { background: #113CC0; }
